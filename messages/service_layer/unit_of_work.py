@@ -2,6 +2,7 @@
 # pylint: disable=attribute-defined-outside-init
 from __future__ import annotations
 import abc
+import logging
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
@@ -12,7 +13,7 @@ from messages.adapters import repository
 
 
 class AbstractUnitOfWork(abc.ABC):
-    products: repository.AbstractRepository
+    messages: repository.AbstractRepository
 
     def __enter__(self) -> AbstractUnitOfWork:
         return self
@@ -20,16 +21,8 @@ class AbstractUnitOfWork(abc.ABC):
     def __exit__(self, *args):
         self.rollback()
 
-    def commit(self):
-        self._commit()
-
-    def collect_new_events(self):
-        for product in self.products.seen:
-            while product.events:
-                yield product.events.pop(0)
-
     @abc.abstractmethod
-    def _commit(self):
+    def commit(self):
         raise NotImplementedError
 
     @abc.abstractmethod
@@ -50,15 +43,16 @@ class SqlAlchemyUnitOfWork(AbstractUnitOfWork):
         self.session_factory = session_factory
 
     def __enter__(self):
+        logging.info("opening db session")
         self.session = self.session_factory()  # type: Session
-        self.products = repository.SqlAlchemyRepository(self.session)
+        self.messages = repository.SqlAlchemyRepository(self.session)
         return super().__enter__()
 
     def __exit__(self, *args):
         super().__exit__(*args)
         self.session.close()
 
-    def _commit(self):
+    def commit(self):
         self.session.commit()
 
     def rollback(self):

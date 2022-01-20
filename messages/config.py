@@ -4,8 +4,8 @@ import os
 def get_postgres_uri():
     host = os.environ.get("DB_HOST", "dev-message-poc.cluster-cbtpcemj4cis.us-west-2.rds.amazonaws.com")
     port = 54321 if host == "localhost" else 5432
-    password = os.environ.get("DB_PASSWORD", "placeholder")
-    user = os.environ.get("DB_USER", "placeholder")
+    password = os.environ.get("DB_PASSWORD", "testtestest")
+    user = os.environ.get("DB_USER", "root")
     db_name = os.environ.get("DB_NAME", "messages")
     return f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
 

@@ -11,6 +11,7 @@ from sqlalchemy import (
     event,
 )
 from sqlalchemy.orm import mapper, relationship
+from messages.domain import model
 
 logger = logging.getLogger(__name__)
 
@@ -27,5 +28,4 @@ messages = Table(
 )
 
 def start_mappers():
-    #TODO: Add mappers for objects in domaint that need them
-    pass
+   mapper(model.Message, messages)
